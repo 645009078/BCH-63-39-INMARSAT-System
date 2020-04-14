@@ -5,7 +5,7 @@ classdef bch
     properties (Access = private)
         n; % code length
         k; % message length
-        m;
+        m; % prim poly degree
         d; % minimum distance
         t; % error correcting capability
         gen_poly;  % decreasing power
@@ -29,7 +29,10 @@ classdef bch
             obj.t = t;
             obj.gen_poly = gen_poly;
             obj.gen_poly_deg = find(gen_poly, 1, 'last') - 1;
-            obj.gf_ext = gftuple([0:2^obj.m-2]', obj.m); % doesnt include 0
+            Power = [-1:2^obj.m-2]';
+            Polynomial = gftuple(Power, obj.m); 
+            Decimal = bi2de(Polynomial);
+            obj.gf_ext = table(Power, Decimal, Polynomial); % doesnt include 0
             
         end 
         function code_polynomial = encode(obj, msg)
@@ -37,107 +40,57 @@ classdef bch
              [~, rem] = gfdeconv(msg_shifted, obj.gen_poly); % get remainder
              code_polynomial = gfadd(msg_shifted, rem, 2); 
         end
-        function res = gf_poly_eval(obj, poly, i) % i is the power of alpha 
-            i = mod(i, 2^obj.m-1); 
-            pow_set = zeros(size(poly, 2), obj.m); % [1, x, x^2, .... ]'
-            
-            % init power set 
-            pow_set(1, :) = obj.gf_ext(1, :);
-            pow_set(2, :) = obj.gf_ext(i+1, :);
-            for pow = 2:size(poly, 2)-1
-                n = mod(i * pow, 2^obj.m-1); % alpha^n = (alpha^i)^pow
-                pow_set(pow + 1, :) = obj.gf_ext(n+1, :); % alpha^n polynomial form 
-            end 
-            
-            % dot product
-            prod = poly' .* pow_set;
-            
-            % add rows for result
-            res = mod(sum(prod, 1), 2); % add elements in gf2
-            return;
+        function ps_inds = gf_power_set_indexes(obj, i, max_pow) % i from alpha^i
+            i = mod(i, 2^obj.m-1);
+            ps_inds = zeros(max_pow+1, 1);
+            ps_inds(1) = 2; % 1
+            ps_inds(2) = i + 2;
+            pows = 2:max_pow;
+            ps_inds(pows+1) = mod(i * pows, 2^obj.m-1) + 2;
         end 
-        function s = syndrome(obj, poly) % fix this to use matrix mult with parity check matrix in the future, for now its fine 
-            s = zeros(2*obj.t, obj.m); % row i is si
+        function res = gf_poly_eval(obj, poly_coeffs, i) % i is for alpha
+            i = mod(i, 2^obj.m-1);
+            power_set_indexes = obj.gf_power_set_indexes(i, size(poly_coeffs,2)-1);
+            power_set_polynomials = obj.gf_ext.Polynomial(power_set_indexes, :);
+            res = mod(sum(poly_coeffs' .* power_set_polynomials, 1), 2);
+        end 
+%         function res = gf_poly_eval(obj, poly, i) % i is the power of alpha 
+%             i = mod(i, 2^obj.m-1); 
+%             pow_set = zeros(size(poly, 2), obj.m); % [1, x, x^2, .... ]'
+%             
+%             % init power set 
+%             pow_set(1, :) = obj.gf_ext.Polynomial(2, :); % 1
+%             pow_set(2, :) = obj.gf_ext.Polynomial(i+2, :); % x
+%             for pow = 2:size(poly, 2)-1
+%                 n = mod(i * pow, 2^obj.m-1); % alpha^n = (alpha^i)^pow
+%                 pow_set(pow + 1, :) = obj.gf_ext.Polynomial(n+2, :); % alpha^n polynomial form 
+%             end 
+%             
+%             % dot product
+%             prod = poly' .* pow_set;
+%             
+%             % add rows for result
+%             res = mod(sum(prod, 1), 2); % add elements in gf2
+%             return;
+%         end 
+        % array of row indexes in gf_ext
+        function s_indexs = syndrome_indexes(obj, poly) % fix this to use matrix mult with parity check matrix in the future, for now its fine 
+            s_indexs = zeros(1, 2*obj.t); % col i is row of si in gf_ext
             for i = 1:2*obj.t
-                s(i, :) = obj.gf_poly_eval(poly, i);
+                poly
+                size(poly)
+                si_poly = obj.gf_poly_eval(poly, i)
+                [s_indexs(i), ~] = find(obj.gf_ext.Decimal == bi2de(si_poly), 1);
             end
             return;
         end 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-%         function res = code_poly_eval(obj, code_poly, i) % i is the power of alpha 
-%             pow_set = zeros(size(code_poly,2), size(x,2)); % [1, x, x^2 ..., x^code_poly_max_degree]', converted to polynomial form 
-%             % init power set
-%             pow_set(1,:) = obj.gf_ext(1,:);
-%             pow_set(2,:) = x;
-%             disp(obj.gf_ext(1,:));
-% %             for i = 1:size(code_poly,2)
-% %                 x_i_poly = gf
-% %             end 
-%         end 
-%         function s = syndrome_calc(obj, gf_poly)
-%            
-%             deg = find(gf_poly, 1, 'last') - 1;
-%             s = zeros(2*obj.t, obj.m);
-%             
-%             for i = 1:2*obj.t
-%                 
-%             end 
-%         end
-        
-%         
-%         
-%         function message = decode(obj, r)
-%             message = bchdec(flip(r), obj.n, obj.k);
-%             message = flip(message);
-%         end
-%         
-%         
-%         
-%         
-%         function rt = get_roots(obj)
-%             rt = gfroots(flip(obj.gen_poly), 24, 2);
-%         end
     end
 end 
+
+
+% shit to fix 
+% - s2i = si^2 (makes syndrome comp much more efficient) 
+% - make it less shit, right now its a mess (potentially generate a
+% syndrome computation matrix )
+
 
