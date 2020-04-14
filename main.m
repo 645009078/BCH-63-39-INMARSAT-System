@@ -1,36 +1,36 @@
-gen_poly = [1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,1,1,0,1,1,1]; % acending power
-code = bch(63,39,9,4,gen_poly);
-%   
-% code.syndrome_indexes(gen_poly);
-% 
-% 
-% 
-% res = code.gf_poly_eval([1,1,0,0,0,0,1], 3);
-% 
-% 
-% syndrome = code.syndrome_indexes(gen_poly); % should be all 0
-% 
-% % example 
-% 
-% message = zeros(1,39);
-% message(1:20) = 1;
-% message
-% 
-% encode 
-codepoly = code.encode(message)
-% 
-% check systematic 
-codepoly(25:end) == message
-% 
-% show parity
-disp("parity bits");
-codepoly(1:24)
-% 
-% 
-% syndrome 
-msg_synd = code.syndrome_indexes(codepoly);
-disp("message syndrome, should be all 1's (0)");
-msg_synd
+% gen_poly = [1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,1,1,0,1,1,1]; % acending power
+% code = bch(63,39,9,4,gen_poly);
+% %   
+% % code.syndrome_indexes(gen_poly);
+% % 
+% % 
+% % 
+% % res = code.gf_poly_eval([1,1,0,0,0,0,1], 3);
+% % 
+% % 
+% % syndrome = code.syndrome_indexes(gen_poly); % should be all 0
+% % 
+% % % example 
+% % 
+% % message = zeros(1,39);
+% % message(1:20) = 1;
+% % message
+% % 
+% % encode 
+% codepoly = code.encode(message)
+% % 
+% % check systematic 
+% codepoly(25:end) == message
+% % 
+% % show parity
+% disp("parity bits");
+% codepoly(1:24)
+% % 
+% % 
+% % syndrome 
+% msg_synd = code.syndrome_indexes(codepoly);
+% disp("message syndrome, should be all 1's (0)");
+% msg_synd
 % 
 % 
 % adding an error and showing syndrome 
@@ -53,15 +53,15 @@ msg_synd
 % checking, example 6.1 and 6.4 from textbook
 gen_61 = [1,0,0,0,1,0,1,1,1];
 code_61 = bch(15, 7, 5, 2, gen_61);
-syndrome_example_64 = code_61.syndrome_indexes([1,0,0,0,0,0,0,0,1,0,0,0,0,0,0]);
-syndrome_example_64 
+syndrome_example_64 = code_61.syndrome_indexes([1,0,0,0,0,0, 0,0,1,0,0,0,0,0,0])
+code_61.decode([1,0,0,0,0,0, 0,0,1,0,0,0,0,0,0]);
 % result is [alpha2, alpha4, alpha7, alpha8], shown in example 6.4
-
-
-% testing power set indicies 
-ps_inds = code.gf_power_set_indexes(3, 6); % 2 --> alpha^2 
-% result should be [2,5,8,11,14,17,20]
-ps_inds
+% 
+% 
+% % testing power set indicies 
+% ps_inds = code.gf_power_set_indexes(3, 6); % 2 --> alpha^2 
+% % result should be [2,5,8,11,14,17,20]
+% ps_inds
 
 
 
