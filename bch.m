@@ -40,14 +40,14 @@ classdef bch
              [~, rem] = gfdeconv(msg_shifted, obj.gen_poly); % get remainder
              code_polynomial = gfadd(msg_shifted, rem, 2); 
         end
-        function ps_exponents = gf_power_set_indexes(obj, i, max_pow)
+        function ps_indexes = gf_power_set_indexes(obj, i, max_pow)
             i = mod(i, 2^obj.m-1);
-            ps_exponents = zeros(size(i, 2), max_pow+1);
-            % calculate power set exponents 
-            ps_exponents(:, 1) = 2; 
-            ps_exponents(:, 2) = i' + 2;
+            ps_indexes = zeros(size(i, 2), max_pow+1);
+            % calculate power set, row indexes in gf_ext field.  
+            ps_indexes(:, 1) = 2; 
+            ps_indexes(:, 2) = i' + 2;
             pows = 2:max_pow;
-            ps_exponents(:, pows+1) = mod(i' .* pows, 2^obj.m-1) + 2;
+            ps_indexes(:, pows+1) = mod(i' .* pows, 2^obj.m-1) + 2;
         end 
         function res = gf_poly_eval(obj, poly_coeffs, i) % i is for alpha^i
             i = mod(i, 2^obj.m-1);
