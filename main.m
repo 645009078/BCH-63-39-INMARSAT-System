@@ -1,6 +1,118 @@
+clear
+clc
+
+gen_poly = [1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,1,1,0,1,1,1]; % acending power
+code = bch(63,39,9,4,gen_poly);
+
+sim = bch_simulation(code);
+ps = 0:0.001:0.5;
+% ps = ps * 10e-3
+mod_order = 4;
+num_sym = 10;
+sim.simulate_bsc(num_sym, mod_order, ps);
+
+
+% % trying to use bsc 
+% 
+% rand_msgs = randi([0 1],64,39); % Random matrix
+% rand_msgs_decoded_my_implementation = zeros(size(rand_msgs));
+% rand_msgs_decoded_their_implementation = zeros(size(rand_msgs));
+% 
+% for n = 1:size(rand_msgs, 1)
+%     cp = bchenc(gf(rand_msgs(n, :)), 63, 39);
+%     rp = bsc(double(cp.x), 0.1);
+%     x = bchdec(gf(rp), 63, 39);
+%     rand_msgs_decoded_their_implementation(n, :) = double(x.x);
+%     
+%     code_poly = code.encode(rand_msgs(n, :));
+%     r_poly = bsc(code_poly, 0.1);
+%     rand_msgs_decoded_my_implementation(n, :) = code.decode(r_poly);
+% end
+% 
+% [num_errs_mine, pct_errs_mine] = biterr(rand_msgs, rand_msgs_decoded_my_implementation)
+% 
+% [num_errs_theirs, pct_errs_theirs] = biterr(rand_msgs, rand_msgs_decoded_their_implementation)
+% 
+% % rank against matlabs 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+
+
+
+
+
+
+% 
 % gen_poly = [1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,1,1,0,1,1,1]; % acending power
 % code = bch(63,39,9,4,gen_poly);
-% %   
+% 
+% message_sample = zeros(1,39);
+% message_sample(1:2:end) = 1;
+% 
+% code_poly = code.encode(message_sample);
+% % introduce errors 
+% code_poly(end-1) = 1;
+% % code_poly(end-3) = 1;
+% code_poly(end-4) = 0;
+% code_poly(end-9) = 1;
+% code_poly(end-15) = 1; % more than 4 errors 
+% 
+% 
+% decoded_msg = code.decode(code_poly);
+% 
+% message_sample == decoded_msg
+% 
+
+
+
+%   
 % % code.syndrome_indexes(gen_poly);
 % % 
 % % 
@@ -48,20 +160,20 @@
 % 
 
 
-
-
-% checking, example 6.1 and 6.4 from textbook
-gen_61 = [1,0,0,0,1,0,1,1,1];
-code_61 = bch(15, 7, 5, 2, gen_61);
-syndrome_example_64 = code_61.syndrome_indexes([1,0,0,0,0,0, 0,0,1,0,0,0,0,0,0])
-code_61.decode([1,0,0,0,0,0, 0,0,1,0,0,0,0,0,0]);
-% result is [alpha2, alpha4, alpha7, alpha8], shown in example 6.4
 % 
 % 
-% % testing power set indicies 
-% ps_inds = code.gf_power_set_indexes(3, 6); % 2 --> alpha^2 
-% % result should be [2,5,8,11,14,17,20]
-% ps_inds
+% % checking, example 6.1 and 6.4 from textbook
+% gen_61 = [1,0,0,0,1,0,1,1,1];
+% code_61 = bch(15, 7, 5, 2, gen_61);
+% syndrome_example_64 = code_61.syndrome_indexes([1,0,0,0,0,0, 0,0,1,0,0,0,0,0,0]);
+% code_61.decode([1,0,0,0,0,0, 0,0,1,0,0,0,0,1,0]);
+% % result is [alpha2, alpha4, alpha7, alpha8], shown in example 6.4
+% % 
+% % 
+% % % testing power set indicies 
+% % ps_inds = code.gf_power_set_indexes(3, 6); % 2 --> alpha^2 
+% % % result should be [2,5,8,11,14,17,20]
+% % ps_inds
 
 
 
