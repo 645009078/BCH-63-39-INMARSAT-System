@@ -4,12 +4,75 @@ clc
 gen_poly = [1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,1,1,0,1,1,1]; % acending power
 code = bch(63,39,9,4,gen_poly);
 
-sim = bch_simulation(code);
-ps = 0:0.001:0.5;
-% ps = ps * 10e-3
-mod_order = 4;
-num_sym = 10;
-sim.simulate_bsc(num_sym, mod_order, ps);
+
+% simulation
+% -----------------------------------------------------------------------------------
+% 
+% sim = bch_simulation(code);
+% 
+% ps = 0:0.01:0.5;
+% % ps = ps * 10e-3
+% num_sym = 10;
+% sim.simulate_bsc(num_sym, ps);
+
+% 
+% 
+% % SNR = 2:1:3; % not in db
+% SNR = 1.3:0.01:3.5; % not in db
+% 
+% mod_order = 4;
+% num_sym = 10000;
+% sim.simulate_awgn(num_sym, mod_order, SNR);
+% 
+% 
+
+
+% ---------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 % % trying to use bsc 

@@ -128,7 +128,7 @@ classdef bch
         function rho = calculate_rho(obj, bia_tbl, max_rho)
             rho = -1/2;
             val = -1; % 2rho - l
-            for mu = max_rho:-1:0
+            for mu = max_rho:-1:0;
                 if bia_tbl{mu+2, 3} ~= 1 && bia_tbl{mu+2, 5} - mu  > val
                     rho = mu;
                     val = bia_tbl{mu+2, 5};
@@ -196,7 +196,8 @@ classdef bch
             
             for mu = 0:obj.t-1
                 d_mu_index = bia_tbl{mu+2, 3};
-                bia_tbl{mu+3, 2} = bia_tbl{mu+2, 2};                % non-zero discrepency
+                bia_tbl{mu+3, 2} = bia_tbl{mu+2, 2};
+                % non-zero discrepency
                 if d_mu_index ~= 1
                     rho = obj.calculate_rho(bia_tbl, mu-1);  
                     d_mu_index = bia_tbl{mu+2, 3}; % element in extended gf
