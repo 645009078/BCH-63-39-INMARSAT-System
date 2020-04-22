@@ -40,7 +40,7 @@ classdef bch_simulation
                 % restore 
                 dec_msgs(:) = 0;
             end
-            return;
+            
         end
         function [coded_bit_error_rates, uncoded_bit_error_rates] = simulate_awgn(obj, num_sym, mod_order, SNR)
             [psk_enc, psk_dec] = obj.init_psk_mod_and_demod(mod_order);
@@ -55,23 +55,14 @@ classdef bch_simulation
                 for n = 1:num_sym
                     % encode 
                     code_poly = obj.code.encode(msgs(n, :));
-                    % pad to make code poly integer multiple of m length
-                    code_poly(end+1) = 0; 
+                    code_poly(end+1) = 0; % pad
                     % encode code poly with psk
                     tx = psk_enc(code_poly');
-                    % transmit over awgn channel
                     rx_awgn = awgn(tx, SNR_db(r), 'measured');
-                    % decode psk
                     r_code = psk_dec(rx_awgn);
-                    % remove padding bits
-                    r_code = r_code(1:end-1); 
-                    % decode recieved code poly
+                    r_code = r_code(1:end-1); % remove pad
                     r_msg = obj.code.decode(r_code');
-                    % save recieved message
                     dec_msgs(n, :) = r_msg; 
-                    % save result of uncoded message
-                    % code is systematic, final k bits of recieved code
-                    % poly
                     uncoded_msgs(n, :) = r_code(end-obj.code.k+1: end);
                 end
                 [~, ber_coded] = biterr(msgs, dec_msgs);
@@ -81,7 +72,20 @@ classdef bch_simulation
                 % restore 
                 dec_msgs(:) = 0;
             end
-            return;
+            norm_snr_db = 10*log(SNR / (obj.code.k/obj.code.n * log2(mod_order)))
+            figure();
+            semilogy(norm_snr_db, calc_coded_bers, '-o');
+            xlabel('E_b/N_o')
+            ylabel('BER')
+            title('BCH (63, 39)')
+            hold on
+            semilogy(norm_snr_db, calc_uncoded_bers, '-o');
+
+            grid on
+            legend('Coded','Uncoded')
+
+
+          
         end 
     end
 end

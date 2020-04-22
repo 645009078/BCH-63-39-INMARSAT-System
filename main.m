@@ -2,18 +2,19 @@ clear
 clc
 
 gen_poly = [1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,1,1,0,1,1,1]; % acending power
-code = bch(63,39,9,4,gen_poly);
+prim_poly = [1,1,0,0,0,0,1];
+code = bch(63,39,9,4,gen_poly,prim_poly );
 
 
 % simulation
 % -----------------------------------------------------------------------------------
 % 
-% sim = bch_simulation(code);
-% 
-% ps = 0:0.01:0.5;
-% % ps = ps * 10e-3
-% num_sym = 10;
-% sim.simulate_bsc(num_sym, ps);
+sim = bch_simulation(code);
+
+ps = 0:0.001:0.05;
+% ps = ps * 10e-3
+num_sym = 10;
+sim.simulate_bsc(num_sym, ps);
 
 % 
 % 
