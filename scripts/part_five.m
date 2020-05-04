@@ -12,6 +12,9 @@
 clear
 clc
 
+% add files in src  
+addpath('../src/');
+
 A = zeros(1, 63);
 A(9) = 2170;
 A(10) = 11718;
@@ -72,9 +75,9 @@ code = bch(n, k, dmin, t,gen_poly,prim_poly );
 
 simulator = bch_simulation(code);
 % ps = 0:0.0025:0.045;
-ps = 0.2:0.05:0.34;
+ps = 0:0.0025:0.045;
 % num_sym = 1000000;
-num_sym = 1000
+num_sym = 1000;
 
 [bit_error_rates, probability_of_undetected] = simulator.simulate_bsc(num_sym, ps)
 

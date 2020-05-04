@@ -1,14 +1,4 @@
-% Assuming that QPSK is used as the modulation scheme, simulate the coding system
-% in a BSC channel. Plot the BER versus p curve. Please note that you need to
-% choose the appropriate values of p , such that the BERs at least cover the range
-% from 10  5 to 10  1 . 
-
-% Plot the undetected error probability with the same range of p
-% values. 
-
-% Compare the simulation results with your estimation produced in 2) and 3)
-% and comment on the accuracy of your estimations and justify.
-
+disp("-----------------------------------------------------------");
 clear
 clc
 
@@ -70,13 +60,12 @@ dmin = 9;
 t = 4;
 code = bch(n, k, dmin, t,gen_poly,prim_poly );
 
-simulator = bch_simulation(code);
-% ps = 0:0.0025:0.045;
-ps = 0.2:0.05:0.34;
-% num_sym = 1000000;
-num_sym = 1000
 
-[bit_error_rates, probability_of_undetected] = simulator.simulate_bsc(num_sym, ps)
+simulator = bch_simulation(code);
+ps = 0.01:0.0025:0.04;
+num_sym = 200;
+
+[~, probability_of_undetected] = simulator.simulate_bsc(num_sym, ps);
 
 
 % theoretical estimations
@@ -85,19 +74,7 @@ prob_undetected_theoretical = 0;
 for i = 1:n
      prob_undetected_theoretical = prob_undetected_theoretical + A(i) * ps.^i .* (1-ps).^(63-i);
 end
-ber_estimation_theoretical = 1/n * (t+1) * nchoosek(63, (t+1)) * ps.^(t+1);
 
-
-% plot ber vs theory
-figure();
-semilogy(ps, bit_error_rates);
-hold on
-semilogy(ps, ber_estimation_theoretical);
-set(gca,'yscale','log')
-ylabel('Bit Error Probability');
-xlabel('BSC Transition Probability');
-grid on
-legend('Simulated', 'Theoretical');
 
 
 % plot probability undetected error estimation vs simulation
@@ -115,7 +92,4 @@ grid on
 legend('Simulated', 'Theoretical (Approximate)', 'Theoretical');
 
 
-
-
-% scroll down on this for simulation
-% https://www.mathworks.com/help/comm/ref/biterr.html
+% 

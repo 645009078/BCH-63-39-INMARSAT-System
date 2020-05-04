@@ -37,7 +37,6 @@ classdef bch
             Polynomial = gftuple(Power, prim_poly); 
             Decimal = bi2de(Polynomial);
             obj.gf_ext = table(Power, Decimal, Polynomial); 
-            
         end 
         function code_polynomial = encode(obj, msg)
              msg_shifted = [zeros(1, obj.n -obj.k), msg]; % multiply by x^(n-k), increasing power
@@ -129,7 +128,7 @@ classdef bch
             rho = -1/2;
             val = -1; % 2rho - l
             for mu = max_rho:-1:0
-                if bia_tbl{mu+2, 3} ~= 1 && bia_tbl{mu+2, 5}  > val
+                if bia_tbl{mu+2, 3} ~= 1 && bia_tbl{mu+2, 5} > val
                     rho = mu;
                     val = bia_tbl{mu+2, 5};
                 end
@@ -198,7 +197,7 @@ classdef bch
                 bia_tbl{mu+3, 1} = mu + 1;
                 bia_tbl{mu+3, 4} = length(bia_tbl{mu+3, 2}) -1;
                 bia_tbl{mu+3, 3} = obj.calculate_simplified_discrepency(bia_tbl, s_inds, mu);
-                bia_tbl{mu+3, 5} = bia_tbl{mu+3, 1} - bia_tbl{mu+3, 4};
+                bia_tbl{mu+3, 5} = 2*bia_tbl{mu+3, 1} - bia_tbl{mu+3, 4};
             end
             sigma_x = bia_tbl{obj.t+2, 2};
             return;

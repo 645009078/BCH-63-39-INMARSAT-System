@@ -1,6 +1,9 @@
 clear
 clc
 
+% add files in src  
+addpath('../src/');
+
 gen_poly = [1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,1,1,0,1,1,1]; % acending power
 prim_poly = [1,1,0,0,0,0,1];
 code = bch(63,39,9,4,gen_poly,prim_poly );

@@ -14,7 +14,7 @@ classdef bch_simulation
             enc.PhaseOffset = pi/4; 
             % initialise psk demodulator 
             dec=comm.PSKDemodulator();
-            dec.ModulationOrder = modulation_order;;
+            dec.ModulationOrder = modulation_order;
             dec.BitOutput = true;
             dec.PhaseOffset = pi/4; 
         end
@@ -28,7 +28,7 @@ classdef bch_simulation
                 n_errs = 0;
                 n_bits = 0;
                 n_undetected = 0;
-                while n_errs <= 100 && n_bits <= 1e7
+                while n_errs <= 100 && n_bits <= 1e8
                     % generate random msg frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 
                     % send msgs over bsc 
@@ -62,21 +62,22 @@ classdef bch_simulation
             coded_bit_error_rates = zeros(1, length(SNR));
             uncoded_bit_error_rates = zeros(1, length(SNR));
             % convert SNR to dB
-            SNR_db = 10*log(SNR);
+            SNR_dB = 10*log(SNR);
             % simulate each SNR
-            for r = 1:numel(SNR_db)
+            for r = 1:numel(SNR_dB)
                 fprintf("simulating SNR %d / %d\n", r, length(SNR));
                 n_coded_errs = 0;
                 n_uncoded_errs = 0;
                 n_bits = 0;
-                while n_coded_errs < 100 && n_bits < 1e7
+                while n_coded_errs < 100 && n_bits < 1e8
                     % generate random message frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 
                     % send each msg over awgn channel
                     for n = 1:num_sym
-                        % encode msg, pad with zeros to enable psk mod
-                        code_poly = zeros(1, ceil(obj.code.n / mod_order) * mod_order);
-                        code_poly = code_poly + obk.code.encode(msgs(n, :));
+                        % encode msg
+                        code_poly = obj.code.encode(msgs(n, :));
+                        % pad with 0 for psk mod 
+                        code_poly(ceil(obj.code.n / mod_order) * mod_order) = 0;
                         % psk mod
                         tx = psk_enc(code_poly');
                         % transmit over awgn channel 
@@ -90,7 +91,7 @@ classdef bch_simulation
                         % count errors 
                         n_bits = n_bits + obj.code.k;
                         n_coded_errs = n_coded_errs + sum(r_msg ~= msgs(n, :));
-                        n_uncoded_errs = n_uncoded_errs + sum(r_code_poly(end-obj.code.k+1:end) ~= msgs(n, :));
+                        n_uncoded_errs = n_uncoded_errs + sum(r_code_poly(end-obj.code.k+1:end)' ~= msgs(n, :));
                     end
                 end
                 coded_bit_error_rates(r) = n_coded_errs / n_bits;
