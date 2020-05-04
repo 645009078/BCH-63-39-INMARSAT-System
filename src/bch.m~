@@ -252,12 +252,10 @@ classdef bch
             sigma_x = bia_tbl{obj.t+2, 2};
             return;
         end
-        function res = gf_ext_poly_eval(obj, poly_coeff_indexes, i) 
+        function res = gf_ext_poly_eval(obj, poly_coeff_indexes, i) % i are exponents, not indexes!
             arguments 
                 obj
-                poly_coeff_indexes (1,:) {mustBeInteger} % indexes of coefficients in gf_ext table
-                i (1,:) {mustBeInteger} % exponents of alpha in gf ext, to be evaluated
-            end
+                poly_coeff
             i = mod(i, 2^obj.m-1);
             % generate power set, one row for each value of i
             power_set_indexes = obj.gf_power_set_indexes(i, size(poly_coeff_indexes,2)-1);
@@ -274,10 +272,6 @@ classdef bch
             return;
         end
         function root_indexes = find_roots_sigma_x(obj, sigma_x)
-            arguments
-                obj
-                sigma_x (1,:) {mustBeInteger} % cofficients, indexes in gf_ext
-            end
             exponents = 0:obj.n-1;
             % evaluate sigma_x for each value of i
             values = obj.gf_ext_poly_eval(sigma_x, exponents);
@@ -285,10 +279,6 @@ classdef bch
             root_indexes = find(values == 1) + 1 ;
         end
         function [message, no_error_detected] = decode(obj, r)
-            arguments
-                obj
-                r (1,:) {mustBeLessThanOrEqual(r, 1)}
-            end
             % syndrome element indexes of recieved code polynomial
             s_inds = obj.syndrome_indexes(r);
             % set error detection flag
