@@ -28,7 +28,7 @@ classdef bch
             end
             obj.n = n;
             obj.k = k;
-            obj.m = log2(n + 1);
+            obj.m = size(prim_poly, 2) - 1;
             obj.d = d;
             obj.t = t;
             obj.gen_poly = gen_poly;
