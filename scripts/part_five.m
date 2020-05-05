@@ -9,8 +9,8 @@
 % Compare the simulation results with your estimation produced in 2) and 3)
 % and comment on the accuracy of your estimations and justify.
 
-% clear
-% clc
+clear
+clc
 
 % add files in src  
 addpath('../src/');
@@ -74,7 +74,9 @@ t = 4;
 code = bch(n, k, dmin, t,gen_poly,prim_poly );
 
 simulator = bch_simulation(code);
-ps = 0:0.0025:0.05;
+% ps = 0:0.0025:0.05;
+ps = 0:0.0025:0.02;
+
 num_sym = 1000;
 
 [bit_error_rates, probability_of_undetected] = simulator.simulate_bsc(num_sym, ps);

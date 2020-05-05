@@ -28,7 +28,7 @@ classdef bch_simulation
                 n_errs = 0;
                 n_bits = 0;
                 n_undetected = 0;
-                while n_errs <= 100 && n_bits <= 1e8
+                while n_errs <= 100 && n_bits <= 1e7
                     % generate random msg frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 
                     % send msgs over bsc 
@@ -63,13 +63,15 @@ classdef bch_simulation
             uncoded_bit_error_rates = zeros(1, length(SNR));
             % convert SNR to dB
             SNR_dB = 10*log(SNR);
+            % set random generator seed
+            rng(22202);
             % simulate each SNR
             for r = 1:numel(SNR_dB)
                 fprintf("simulating SNR %d / %d\n", r, length(SNR));
                 n_coded_errs = 0;
                 n_uncoded_errs = 0;
                 n_bits = 0;
-                while n_coded_errs < 100 && n_bits < 1e8
+                while n_coded_errs < 100 && n_bits < 1e7
                     % generate random message frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 
                     % send each msg over awgn channel

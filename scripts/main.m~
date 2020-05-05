@@ -15,18 +15,14 @@ code_poly = code.encode(msg);
                     err = randi([0 1],1,63); 
 
 code_poly_altered = mod(code_poly + err, 2);
-% code_poly_altered = code_poly;
-% 
-% 
-s1 = code.calculate_syndrome(code_poly_altered);
-s2 = code2.syndrome_indexes(code_poly_altered);
-s1 
-s2
+
+
+s1
 % 
 % r_msg = code.decode(code_poly_altered);
 % r_msg2 = code2.decode(code_poly_altered);
 % 
-% code_poly_altered ~= code_poly;
+% code_poly_altered ~= code_poly
 % r_msg ~= msg
 % r_msg2 ~= msg
 % r_msg ~= r_msg2
