@@ -65,8 +65,8 @@ simulator = bch_simulation(code);
 ps = 0.01:0.0025:0.04;
 num_sym = 200;
 
-[~, probability_of_undetected] = simulator.simulate_bsc(num_sym, ps);
-
+% [~, probability_of_undetected] = simulator.simulate_bsc(num_sym, ps);
+probability_of_undetected = 0;
 
 % theoretical estimations
 prob_undetected_theoretical_approx = 2170 * ps.^dmin;

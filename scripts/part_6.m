@@ -13,7 +13,7 @@ t = 4;
 code = bch(n,k,dmin,t,gen_poly,prim_poly);
 simulator = bch_simulation(code);
 
-SNR = 1:0.1:2.1; % not in db
+SNR = 1:0.1:2; % not in db
 mod_order = 4;
 num_sym = 200;
 [coded_bit_error_rates, uncoded_bit_error_rates] = simulator.simulate_awgn(num_sym, mod_order, SNR)

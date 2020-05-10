@@ -28,7 +28,7 @@ classdef bch_simulation
                 n_errs = 0;
                 n_bits = 0;
                 n_undetected = 0;
-                while n_errs <= 100 && n_bits <= 1e16 && n_undetected <= 100
+                while n_errs <= 100 && n_bits <= 1e16 
                     % generate random msg frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 
                     % send msgs over bsc 
