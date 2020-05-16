@@ -28,15 +28,14 @@ t = 4;
 code = bch(n, k, dmin, t,gen_poly,prim_poly );
 
 simulator = bch_simulation(code);
-% % ps = 0:0.0025:0.05;
-ps = 0.8:0.1:1;
+% ps = 0:0.0025:0.05;
+ps = 0.5:0.1:0.8;
 num_sym = 1000;
 
-[bit_error_rates] = simulator.simulate_bsc_BER(num_sym, ps);
+[bit_error_rates, probability_of_undetected] = simulator.simulate_bsc(num_sym, ps);
 
 % get prob undetected error 
-[probability_of_undetected] = simulator.simulate_bsc_prob_undetected_error(num_sym, ps);
-
+[probability_of_undetected = simulate_bsc_prob_undetected_error
 % theoretical estimations
 prob_undetected_theoretical_approx = 2170 * ps.^dmin;
 prob_undetected_theoretical = zeros(1, size(ps, 2));

@@ -6,19 +6,20 @@ classdef bch_simulation
         function obj = bch_simulation(bch_code)
             obj.code = bch_code;
         end
-        function [enc, dec] = init_psk_mod_and_demod(obj, modulation_order)
+        function [mod, demod] = init_psk_mod_and_demod(obj, modulation_order)
             % initialise psk modulator 
-            enc = comm.PSKModulator();
-            enc.ModulationOrder = modulation_order;
-            enc.BitInput=true;
-            enc.PhaseOffset = pi/4; 
+            mod = comm.PSKModulator();
+            mod.ModulationOrder = modulation_order;
+            mod.BitInput=true;
+            mod.PhaseOffset = pi/4; 
             % initialise psk demodulator 
-            dec=comm.PSKDemodulator();
-            dec.ModulationOrder = modulation_order;
-            dec.BitOutput = true;
-            dec.PhaseOffset = pi/4; 
+            demod=comm.PSKDemodulator();
+            demod.ModulationOrder = modulation_order;
+            demod.BitOutput = true;
+            demod.PhaseOffset = pi/4; 
+            return;
         end
-        function [bit_error_rates, prob_undetected_errors] = simulate_bsc(obj, num_sym, ps)
+        function [bit_error_rates] = simulate_bsc_BER(obj, num_sym, ps)
             % initialise return arrays
             bit_error_rates = zeros(1, length(ps));
             prob_undetected_errors = zeros(1, length(ps));
@@ -28,7 +29,7 @@ classdef bch_simulation
                 n_errs = 0;
                 n_bits = 0;
                 n_undetected = 0;
-                while n_errs <= 100 || n_undetected <= 1
+                while n_errs <= 100 && n_bits <= 1e7
                     % generate random msg frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 
                     % send msgs over bsc 
@@ -55,9 +56,9 @@ classdef bch_simulation
             end
             return;
         end
-        function [coded_bit_error_rates, uncoded_bit_error_rates] = simulate_awgn(obj, num_sym, mod_order, SNR)
+        function [coded_bit_error_rates, uncoded_bit_error_rates] = simulate_awgn_BER(obj, num_sym, mod_order, SNR)
             % initialise psk modulator and demodulator
-            [psk_enc, psk_dec] = obj.init_psk_mod_and_demod(mod_order);
+            [psk_mod, psk_demod] = obj.init_psk_mod_and_demod(mod_order);
             % initialise return vectors
             coded_bit_error_rates = zeros(1, length(SNR));
             uncoded_bit_error_rates = zeros(1, length(SNR));
@@ -84,11 +85,11 @@ classdef bch_simulation
                         % pad with 0 for psk mod 
                         code_poly(ceil(obj.code.n / mod_order) * mod_order) = 0;
                         % psk mod
-                        tx = psk_enc(code_poly');
+                        tx = psk_mod(code_poly');
                         % transmit over awgn channel 
                         rx = awgn(tx);
                         % psk demod
-                        r_code_poly = psk_dec(rx);
+                        r_code_poly = psk_demod(rx);
                         % remove padding bits
                         r_code_poly = r_code_poly(1:obj.code.n);
                         % decode bch poly
@@ -103,7 +104,38 @@ classdef bch_simulation
                 uncoded_bit_error_rates(r) = n_uncoded_errs / n_bits;
             end
             return;
-        end 
+        end
+        function [prob_undetected_errors] = simulate_bsc_prob_undetected_error(obj, num_sym, ps)
+            % initialise return arrays
+            prob_undetected_errors = zeros(1, length(ps));
+            % simulate BER 
+            for i = 1:length(ps)
+                fprintf("simulating transition probability %d / %d\n", i, length(ps));
+                n_msgs = 0;
+                n_undetected = 0;
+                while n_undetected <= 1
+                    % generate random msg frame 
+                    msgs = randi([0 1],num_sym,obj.code.k); 
+                    % send msgs over bsc 
+                    for n = 1:num_sym
+                        % encode row
+                        codeword = obj.code.encode(msgs(n, :));
+                        % send over binary symmetric channel
+                        r_codeword = bsc(codeword, ps(i));
+                        % calc syndrome
+                        syndrome = obj.code.calculate_syndrome(r_codeword);
+                        if (all(syndrome == -Inf)) 
+                            if (msgs(n, :) ~= r_codeword(end-obj.code.k+1: end))
+                                n_undetected = n_undetected + 1;
+                            end
+                        end
+                        n_msgs = n_msgs + 1;
+                    end
+                end
+                prob_undetected_errors(i) = n_undetected / n_msgs;
+            end
+            return;
+        end
     end
 end
 
