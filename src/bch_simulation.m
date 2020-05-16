@@ -28,7 +28,7 @@ classdef bch_simulation
                 n_errs = 0;
                 n_bits = 0;
                 n_undetected = 0;
-                while n_errs <= 100 && n_bits <= 1e16 && n_undetected <= 100
+                while n_errs <= 100 || n_undetected <= 1
                     % generate random msg frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 
                     % send msgs over bsc 
@@ -51,7 +51,7 @@ classdef bch_simulation
                     end
                 end
                 bit_error_rates(i) = n_errs / n_bits;
-                prob_undetected_errors(i) = n_undetected / n_bits;
+                prob_undetected_errors(i) = n_undetected / (n_bits / obj.code.k);
             end
             return;
         end
@@ -63,14 +63,17 @@ classdef bch_simulation
             uncoded_bit_error_rates = zeros(1, length(SNR));
             % convert SNR to dB
             SNR_dB = 10*log(SNR);
-            % set random generator seed
-            rng(22202);
+            % generate channel 
+            awgn = comm.AWGNChannel();
+            awgn.NoiseMethod = 'Signal to noise ratio (Eb/No)';
+            awgn.BitsPerSymbol = log2(mod_order);
             % simulate each SNR
             for r = 1:numel(SNR_dB)
                 fprintf("simulating SNR %d / %d\n", r, length(SNR));
                 n_coded_errs = 0;
                 n_uncoded_errs = 0;
                 n_bits = 0;
+                awgn.EbNo = SNR_dB(r);
                 while n_coded_errs < 100 && n_bits < 1e7
                     % generate random message frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 
@@ -83,7 +86,7 @@ classdef bch_simulation
                         % psk mod
                         tx = psk_enc(code_poly');
                         % transmit over awgn channel 
-                        rx = awgn(tx, SNR_dB(r));
+                        rx = awgn(tx);
                         % psk demod
                         r_code_poly = psk_dec(rx);
                         % remove padding bits
@@ -108,71 +111,3 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% 
-%  gen_poly = [1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,1,1,0,1,1,1]; % acending power
-% 
-%             message_sample = zeros(1,39);
-%             message_sample(1:2:end) = 1;
-% 
-%             code_poly = obj.code.encode(message_sample);
-%             % introduce errors 
-%             code_poly(end-1) = 1;
-%             code_poly(end-3) = 1;
-%             code_poly(end-4) = 0;
-% %             code_poly(end-9) = 1;
-%             code_poly(end-15) = 1; % more than 4 errors 
-% 
-% 
-%             decoded_msg = obj.code.decode(code_poly);
-% 
-%             message_sample == decoded_msg
