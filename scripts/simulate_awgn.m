@@ -1,3 +1,4 @@
+
 clear
 clc
 
@@ -15,18 +16,17 @@ simulator = bch_simulation(code);
 
 % normalise SNR
 mod_order = 4;
-SNR = 1:0.1:2.5; % not in db
-SNR_norm = SNR / ((k/n) * log2(mod_order));
-SNR_norm_db = 10*log(SNR_norm);
+SNR_norm_dB = 0:10;
 num_sym = 200;
-[coded_bit_error_rates, uncoded_bit_error_rates] = simulator.simulate_awgn_BER(num_sym, mod_order, SNR_norm)
+[coded_bit_error_rates, uncoded_bit_error_rates] = simulator.simulate_awgn_BER(num_sym, mod_order, SNR_norm_dB)
 
 figure();
-semilogy(SNR_norm_db, coded_bit_error_rates);
+semilogy(SNR_norm_dB, coded_bit_error_rates);
 hold on
-semilogy(SNR_norm_db, uncoded_bit_error_rates);
+semilogy(SNR_norm_dB, uncoded_bit_error_rates);
 xlabel('E_b/N_o');
 ylabel('BER');
 grid on 
 set(gca,'yscale','log');
 legend('Coded', 'Uncoded');
+title('BCH(63, 39) QPSK AWGN BER');

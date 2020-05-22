@@ -22,13 +22,11 @@ classdef bch_simulation
         function [bit_error_rates] = simulate_bsc_BER(obj, num_sym, ps)
             % initialise return arrays
             bit_error_rates = zeros(1, length(ps));
-            prob_undetected_errors = zeros(1, length(ps));
             % simulate BER 
             for i = 1:length(ps)
                 fprintf("simulating transition probability %d / %d\n", i, length(ps));
                 n_errs = 0;
                 n_bits = 0;
-                n_undetected = 0;
                 while n_errs <= 100 && n_bits <= 1e7
                     % generate random msg frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 
@@ -38,12 +36,8 @@ classdef bch_simulation
                         codeword = obj.code.encode(msgs(n, :));
                         % send over binary symmetric channel
                         r_codeword = bsc(codeword, ps(i));
-                        [r_msg, no_error_detected] = obj.code.decode(r_codeword);
-                        err_count = sum(r_msg ~= msgs(n, :));
-                        % check for undetected errors  
-                        if (no_error_detected == 1 && err_count ~= 0)
-                            n_undetected = n_undetected + 1;
-                        end
+                        r_msg = obj.code.decode(r_codeword);
+                        err_count = sum(r_msg ~= msgs(n, :));                        
                         % record detected codeword
                         if (err_count ~= 0)
                             n_errs = n_errs + err_count;
@@ -52,29 +46,26 @@ classdef bch_simulation
                     end
                 end
                 bit_error_rates(i) = n_errs / n_bits;
-                prob_undetected_errors(i) = n_undetected / (n_bits / obj.code.k);
             end
             return;
         end
-        function [coded_bit_error_rates, uncoded_bit_error_rates] = simulate_awgn_BER(obj, num_sym, mod_order, SNR)
+        function [coded_bit_error_rates, uncoded_bit_error_rates] = simulate_awgn_BER(obj, num_sym, mod_order, SNR_norm_dB)
             % initialise psk modulator and demodulator
             [psk_mod, psk_demod] = obj.init_psk_mod_and_demod(mod_order);
             % initialise return vectors
-            coded_bit_error_rates = zeros(1, length(SNR));
-            uncoded_bit_error_rates = zeros(1, length(SNR));
-            % convert SNR to dB
-            SNR_dB = 10*log(SNR);
+            coded_bit_error_rates = zeros(1, length(SNR_norm_dB));
+            uncoded_bit_error_rates = zeros(1, length(SNR_norm_dB));
             % generate channel 
             awgn = comm.AWGNChannel();
             awgn.NoiseMethod = 'Signal to noise ratio (Eb/No)';
             awgn.BitsPerSymbol = log2(mod_order);
             % simulate each SNR
-            for r = 1:numel(SNR_dB)
-                fprintf("simulating SNR %d / %d\n", r, length(SNR));
+            for r = 1:numel(SNR_norm_dB)
+                fprintf("simulating SNR %d / %d\n", r, length(SNR_norm_dB));
                 n_coded_errs = 0;
                 n_uncoded_errs = 0;
                 n_bits = 0;
-                awgn.EbNo = SNR_dB(r);
+                awgn.EbNo = SNR_norm_dB(r);
                 while n_coded_errs < 100 && n_bits < 1e7
                     % generate random message frame 
                     msgs = randi([0 1],num_sym,obj.code.k); 

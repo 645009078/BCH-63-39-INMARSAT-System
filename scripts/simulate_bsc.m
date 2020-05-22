@@ -28,46 +28,69 @@ t = 4;
 code = bch(n, k, dmin, t,gen_poly,prim_poly );
 
 simulator = bch_simulation(code);
-% % ps = 0:0.0025:0.05;
-ps = 0.8:0.1:1;
+ps = 0.0025:0.005:0.07;
 num_sym = 1000;
 
 [bit_error_rates] = simulator.simulate_bsc_BER(num_sym, ps);
 
-% get prob undetected error 
-[probability_of_undetected] = simulator.simulate_bsc_prob_undetected_error(num_sym, ps);
-
 % theoretical estimations
-prob_undetected_theoretical_approx = 2170 * ps.^dmin;
-prob_undetected_theoretical = zeros(1, size(ps, 2));
-for i = 1:n
-     prob_undetected_theoretical = prob_undetected_theoretical + A(i) * ps.^i .* (1-ps).^(63-i);
-end
-ber_estimation_theoretical = 1/n * (t+1) * nchoosek(63, (t+1)) * ps.^(t+1);
 
+% upper bound estimation
+ber_upper_bound = zeros(size(ps));
+for i = (t+1):n
+    ber_upper_bound = ber_upper_bound + (t + i) * nchoosek(n, i) * ps.^(i) .* (1-ps).^(n-i);
+end
+ber_upper_bound = ber_upper_bound / n;
+
+% ber approximation
+ber_approx = zeros(size(ps));
+for i = (t+1):n
+    ber_approx = ber_approx  + i * nchoosek(n, i) * ps.^i .* (1 - ps).^(n-i);
+end
+ber_approx = ber_approx / n;
+
+% ber approximation for p << 1
+ber_low_p_approx = 1/n * (t+1) * nchoosek(63, (t+1)) * ps.^(t+1);
 
 % plot ber vs theory
 figure();
 semilogy(ps, bit_error_rates);
 hold on
-semilogy(ps, ber_estimation_theoretical);
+semilogy(ps, ber_approx);
+hold on
+semilogy(ps, ber_upper_bound);
+hold on
+semilogy(ps, ber_low_p_approx);
 set(gca,'yscale','log')
 ylabel('Bit Error Probability');
 xlabel('BSC Transition Probability');
 grid on
-legend('Simulated', 'Theoretical');
+legend('Simulated', 'BER Approximate', 'Upper Bound', 'BER Approximate (p << 1)');
+title('BCH(63, 39) BSC BER');
 
+% get prob undetected error 
+[undetected_err_prob] = simulator.simulate_bsc_prob_undetected_error(num_sym, ps);
+
+% approximate undetected error  probability 
+approx_undetected_err_prob = 2170 * ps.^dmin;
+
+% theoretical undetected error probability
+undetected_err_prob_theoretical = zeros(1, size(ps, 2));
+for i = 1:n
+     undetected_err_prob_theoretical = undetected_err_prob_theoretical + A(i) * ps.^i .* (1-ps).^(63-i);
+end
 
 % plot probability undetected error estimation vs simulation
 figure();
 hold on
-plot(ps, probability_of_undetected);
+plot(ps, undetected_err_prob);
 hold on
-plot(ps, prob_undetected_theoretical_approx);
+plot(ps, approx_undetected_err_prob);
 hold on
-plot(ps, prob_undetected_theoretical);
+plot(ps, undetected_err_prob_theoretical);
 set(gca,'yscale','log')
 ylabel('Undetected Error Probability');
 xlabel('BSC Transition Probability');
 grid on
 legend('Simulated', 'Theoretical (Approximate)', 'Theoretical');
+title('BCH(63, 39) BSC Undetected Error Probability');
